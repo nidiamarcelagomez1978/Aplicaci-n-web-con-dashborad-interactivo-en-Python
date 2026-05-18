@@ -1,0 +1,62 @@
+import pandas as pd
+
+# Leer archivos
+mortalidad = pd.read_excel("Anexo1.NoFetal2019_CE_15-03-23.xlsx")
+divipola = pd.read_excel("Divipola_CE_.xlsx")
+# codigos = pd.read_excel("Anexo2.CodigosDeMuerte_CE_15-03-23.xlsx")
+
+
+codigos = pd.read_excel(
+    "Anexo2.CodigosDeMuerte_CE_15-03-23.xlsx",
+    sheet_name="Final",
+    header=8
+)
+
+# Limpiar espacios
+codigos.columns = codigos.columns.str.strip()
+
+# Ver columnas
+print(codigos.columns.tolist())
+
+# Renombrar primeras columnas
+codigos.columns.values[4] = "COD_MUERTE"
+codigos.columns.values[5] = "NOMBRE_MUERTE"
+
+print(codigos.head())
+
+mortalidad = mortalidad.merge(
+    codigos[["COD_MUERTE", "NOMBRE_MUERTE"]],
+    on="COD_MUERTE",
+    how="left"
+)
+
+
+
+# Crear TOTAL
+mortalidad["TOTAL"] = 1
+
+# Unir departamentos
+mortalidad = mortalidad.merge(
+divipola[
+["COD_DANE", "DEPARTAMENTO", "MUNICIPIO"]
+],
+on="COD_DANE",
+how="left"
+)
+
+# Unir causas
+mortalidad = mortalidad.merge(
+codigos[
+["COD_MUERTE", "NOMBRE_MUERTE"]
+],
+on="COD_MUERTE",
+how="left"
+)
+
+# Guardar
+mortalidad.to_excel(
+"mortalidad_2019.xlsx",
+index=False
+)
+
+
